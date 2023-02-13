@@ -46,7 +46,7 @@ monitors_connected|length > 0 %}
           </label>
         </div>
         <div class="news-time">
-          <h3 style="margin-right: auto;">Audio</h3>
+          <h3 style="margin-right: auto">Audio</h3>
           <div class="input--container">
             <input
               type="time"
@@ -70,14 +70,14 @@ monitors_connected|length > 0 %}
           </div>
         </div>
         <div class="active-time">
-          <h3 style="margin-right: auto;">Aktiv</h3>
+          <h3 style="margin-right: auto">Aktiv</h3>
           <div class="input--container">
             <input
               type="time"
               name="from-a"
               id="from-a"
               placeholder="from"
-              value="{{monitors_connected[0].news_from}}"
+              value="{{monitors_connected[0].on_from}}"
               step="3600"
             /><label for="from-a">Von</label>
           </div>
@@ -88,7 +88,7 @@ monitors_connected|length > 0 %}
               name="to-a"
               id="to-a"
               placeholder="to"
-              value="{{monitors_connected[0].news_to}}"
+              value="{{monitors_connected[0].on_to}}"
               step="3600"
             /><label for="to-a">Bis</label>
           </div>
