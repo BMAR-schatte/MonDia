@@ -7,6 +7,8 @@ import json
 import os
 from wakeonlan import send_magic_packet
 from datetime import datetime
+from time import sleep
+from threading import Thread
 
 
 app = Flask(__name__)
@@ -183,28 +185,6 @@ def update_ep():
     if request.method == "GET":
         query = DB.Monitor.query.filter_by(
             pc_name=request.args["monitor"]).first()
-        hour_from = int(query.on_from.split(":")[0])
-        hour_to = int(query.on_to.split(":")[0])
-        now = datetime.now().hour
-        
-        if now < hour_to and now >= hour_from and not query.on:
-            turn_on_pc(query.ip)
-            query.on = True
-            db.session.add(query)
-            db.session.commit()
-        elif (now > hour_to or now < hour_from) and query.on:
-            query.on = False
-            db.session.add(query)
-            db.session.commit()
-        query = {
-            "pc_name": query.pc_name,
-            "ip": query.ip,
-            "play_time": query.play_time,
-            "on": query.on,
-            "play_news": query.play_news,
-            "news_from": query.news_from,
-            "news_to": query.news_to
-        }
         if query:
             return json.dumps(query)
         else:
@@ -260,7 +240,37 @@ def switch_ep():
     return "Success"
 
 
+def updater():
+    while True:
+        with app.app_context():
+            for query in DB.Monitor.query.all():
+                hour_from = int(query.on_from.split(":")[0])
+                hour_to = int(query.on_to.split(":")[0])
+                now = datetime.now().hour
+                
+                if now < hour_to and now >= hour_from and not query.on:
+                    turn_on_pc(query.ip)
+                    query.on = True
+                    db.session.add(query)
+                    db.session.commit()
+                elif (now > hour_to or now < hour_from) and query.on:
+                    query.on = False
+                    db.session.add(query)
+                    db.session.commit()
+                query = {
+                    "pc_name": query.pc_name,
+                    "ip": query.ip,
+                    "play_time": query.play_time,
+                    "on": query.on,
+                    "play_news": query.play_news,
+                    "news_from": query.news_from,
+                    "news_to": query.news_to
+                }
+        sleep(1)
+
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
+        Thread(target=updater, daemon=True).start()
     app.run(host="0.0.0.0", port=80, debug=True)
