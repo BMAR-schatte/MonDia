@@ -1,0 +1,123 @@
+{%extends "layout.html"%} {%block head%}
+<script src="/static/input.js"></script>
+{%endblock%} {%block content%}
+<form class="login-form--container" autocomplete="off">
+  <h1 class="heading">Registrieren</h1>
+  <div class="input--container" id="username-c">
+    <input name="username" id="username" placeholder="Username" />
+    <label for="username">Nutzername</label>
+  </div>
+  <div class="input--container" id="password-c">
+    <input
+      name="password"
+      id="password"
+      placeholder="Password"
+      type="password"
+      autocomplete="off"
+    />
+    <label for="password">Passwort</label>
+  </div>
+  <div class="input--container" id="password-v-c">
+    <input
+      name="password-v"
+      id="password-v"
+      placeholder="Password-v"
+      type="password"
+      autocomplete="off"
+    />
+    <label for="password-v">Passwort Verifizieren</label>
+  </div>
+  <input type="submit" value="Registrieren" />
+  <p>
+    Sie haben ein Konto?
+    <a href="/login" style="font-weight: 500; text-decoration: underline"
+      >Loggen</a
+    >
+    Sie sich ein.
+  </p>
+</form>
+{%endblock%} {%block scripts%}
+<script>
+  $("#username").keyup(() => {
+    const elm = $("#username");
+    if (elm.val().length > 3 && elm.val().length < 20) {
+      elm.addClass("input-green");
+      elm.parent().removeClass("input-red");
+      $(`#${elm.parent().attr("id")}-e`).remove();
+    } else {
+      elm.removeClass("input-green");
+    }
+  });
+
+  $("#password").keyup(() => {
+    const elm = $("#password");
+    if (elm.val().length > 8 && elm.val().length < 50) {
+      elm.addClass("input-green");
+      elm.parent().removeClass("input-red");
+      $(`#${elm.parent().attr("id")}-e`).remove();
+    } else {
+      elm.removeClass("input-green");
+    }
+  });
+
+  $("#password-v").keyup(() => {
+    if (
+      $("#password").val() === $("#password-v").val() &&
+      $("#password-v").val().length > 8 &&
+      $("#password-v").val().length < 50
+    ) {
+      $("#password-v").addClass("input-green");
+      $("#password-v").parent().removeClass("input-red");
+      $(`#${$("#password-v").parent().attr("id")}-e`).remove();
+    } else {
+      $("#password-v").removeClass("input-green");
+    }
+  });
+  $(".login-form--container").submit(function () {
+    const username = $("#username");
+    const password = $("#password");
+    const password_v = $("#password-v");
+    var err = false;
+
+    if (username.val().length < 4 || username.val().length > 19) {
+      set_error("#username-c", "* Dies ist ein Pflichfeld!");
+      err = true;
+    }
+    if (password.val().length < 9 || password.val().length > 49) {
+      set_error(
+        "#password-c",
+        "* Das Passwort muss mindestens 9 Zeichen lang sein und darf nicht länger als 49 Zeichen sein!"
+      );
+      err = true;
+    }
+    if (password_v.val() != password.val()) {
+      set_error("#password-v-c", "* Die Passwörter stimmen nicht überein!");
+      err = true;
+    }
+    if (err) return false;
+    fetch(window.location.href, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      redirect: "follow",
+      body: JSON.stringify({
+        username: username.val(),
+        password: password.val(),
+      }),
+    })
+      .then(async (resp) => {
+        if (resp.ok) {
+          await show_success("Konto erstellt, Sie werden in Kürze eingeloggt");
+          window.location = "/";
+        } else {
+          await show_error(await resp.text());
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    return false;
+  });
+</script>
+{%endblock%}

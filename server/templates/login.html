@@ -1,0 +1,53 @@
+{%extends "layout.html"%} {%block content%}
+<form class="login-form--container">
+  <h1 class="heading">Einloggen</h1>
+  <div class="input--container">
+    <input name="username" id="username" placeholder="Username" />
+    <label for="username">Nutzername</label>
+  </div>
+  <div class="input--container">
+    <input
+      name="password"
+      id="password"
+      placeholder="password"
+      type="password"
+    />
+    <label for="password">Password</label>
+  </div>
+  <input type="submit" value="Login" />
+</form>
+{%endblock%} {% block scripts %}
+<script>
+  $(".login-form--container").submit(function () {
+    const username = $("#username").val();
+    const password = $("#password").val();
+    fetch(window.location.href, {
+      method: "POST",
+      mode: "cors",
+      cache: "no-cache",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+      }),
+    })
+      .then(async (resp) => {
+        if (resp.ok) {
+          await show_success(
+            "Login erfolgreich, Sie werden in Kürze weitergeleitet"
+          );
+          window.location = "/";
+        } else {
+          show_error(await resp.text());
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    return false;
+  });
+</script>
+{%endblock%}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MK | {{title}}</title>
+    <link rel="stylesheet" href="/static/main.css" />
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <script src="/static/jq.js"></script>
+    <script src="/static/message.js"></script>
+    {% block head %}{%endblock%}
+  </head>
+  <body>
+    <div class="loader">
+      <span class="flicker-out">
+        <div>
+          <p>S</p>
+          <p>c</p>
+          <p>h</p>
+          <p class="flicker">a</p>
+          <p>t</p>
+          <p>t</p>
+          <p>e</p>
+        </div>
+        <div>
+          <span>seit 1914</span>
+        </div>
+      </span>
+    </div>
+    <div class="messages--container"></div>
+    <div class="top-nav--container">
+      <a class="logo-main" href="/">
+        <img src="/static/index.png" />
+      </a>
+      <div class="top-nav-links">
+        <a href="/">Kontrollzentrum</a>
+        <a href="/help">Hilfe</a>
+        <span id="logout">{% if user %}Logout{%else%}Login{%endif%}</span>
+      </div>
+    </div>
+    <div class="main--container">{% block content %}{%endblock%}</div>
+    <script>
+      init();
+      async function init() {
+        await sleep(2000);
+        $(window).ready(async () => {
+          $(".loader").css("background", "#fff");
+          $(".loader").css("opacity", "0");
+          await sleep(500);
+          $(".loader").remove();
+        });
+      }
+      $("#logout").click(async function () {
+        document.cookie = "session_id=; Max-Age=0";
+        window.location = "/login";
+      });
+    </script>
+    {% block scripts %} {%endblock%}
+  </body>
+</html>

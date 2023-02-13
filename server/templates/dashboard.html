@@ -1,0 +1,182 @@
+{%extends "layout.html"%} {%block head%} {%endblock%} {%block content%} {% if
+monitors_connected|length > 0 %}
+<div class="mn-grid--container">
+  <div class="mn-grid-0">
+    <h2 style="text-align: center; font-weight: 600">Monitore</h2>
+    <div class="monitors-select"></div>
+  </div>
+  <div class="mn-grid-1">
+    <div class="mn-grid-1-top">
+      <div class="mn-grid-1-top-info">
+        <p style="margin-bottom: -10px" id="ip">{{monitors_connected[0].ip}}</p>
+        <h1 id="pc-name">{{monitors_connected[0].pc_name}}</h1>
+      </div>
+      <div class="mn-grid-1-b">
+        <label class="switch--container">
+          <input id="on" type="checkbox" />
+          <span></span>
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="monitors">
+    <span class="checked">{{monitors_connected[0].pc_name}}</span>
+    {% for mon in monitors_connected[1:] %}
+    <span>{{mon.pc_name}}</span>
+    {%endfor%}
+  </div>
+  <div class="settings--container">
+    <form id="settings">
+      <div class="settings">
+        <div class="input--container">
+          <input
+            type="text"
+            name="show-speed"
+            id="show-speed"
+            placeholder="show-speed"
+            style="width: calc(100% - 10px)"
+            value="{{monitors_connected[0].play_time}}"
+          /><label for="show-speed">Anzeigedauer (s)</label>
+        </div>
+        <div class="play-news">
+          <h3>News Spielen</h3>
+          <label class="switch--container">
+            <input id="play" type="checkbox" />
+            <span></span>
+          </label>
+        </div>
+        <div class="news-time">
+          <h3 style="margin-right: auto;">Audio</h3>
+          <div class="input--container">
+            <input
+              type="time"
+              name="from"
+              id="from"
+              placeholder="from"
+              value="{{monitors_connected[0].news_from}}"
+              step="3600"
+            /><label for="from">Von</label>
+          </div>
+          <p>-</p>
+          <div class="input--container">
+            <input
+              type="time"
+              name="to"
+              id="to"
+              placeholder="to"
+              value="{{monitors_connected[0].news_to}}"
+              step="3600"
+            /><label for="to">Bis</label>
+          </div>
+        </div>
+        <div class="active-time">
+          <h3 style="margin-right: auto;">Aktiv</h3>
+          <div class="input--container">
+            <input
+              type="time"
+              name="from-a"
+              id="from-a"
+              placeholder="from"
+              value="{{monitors_connected[0].news_from}}"
+              step="3600"
+            /><label for="from-a">Von</label>
+          </div>
+          <p>-</p>
+          <div class="input--container">
+            <input
+              type="time"
+              name="to-a"
+              id="to-a"
+              placeholder="to"
+              value="{{monitors_connected[0].news_to}}"
+              step="3600"
+            /><label for="to-a">Bis</label>
+          </div>
+        </div>
+        <input type="submit" value="Übernehmen" />
+      </div>
+    </form>
+    <button onclick="delete_mon()" class="delete-btn">Löschen</button>
+  </div>
+</div>
+{% else %}
+<h1>Keine Monitore verbunden</h1>
+{%endif%} {%endblock%} {% block scripts%} {% if monitors_connected|length > 0 %}
+<script src="/static/submit.js"></script>
+{% if monitors_connected[0].on %}
+<script>
+  $("#on").prop("checked", true);
+</script>
+{%endif%} {% if monitors_connected[0].play_news %}
+<script>
+  $("#play").prop("checked", true);
+</script>
+{%endif%}
+<script>
+  $(document).ready(function () {
+    if ($("#onoff--input").is(":checked")) {
+      $("#onoff--p").text("an");
+    } else {
+      $("#onoff--p").text("aus");
+    }
+  });
+  $("#onoff--input").click(function () {
+    if ($("#onoff--input").is(":checked")) {
+      $("#onoff--p").text("an");
+    } else {
+      $("#onoff--p").text("aus");
+    }
+  });
+  $(".monitors > span").click(function () {
+    $(".monitors > span").each(function (index) {
+      if ($(this).hasClass("checked")) {
+        $(this).removeClass("checked");
+      }
+    });
+    $(this).addClass("checked");
+    fetch("/update?monitor=" + $(this).text()).then(async (resp) => {
+      if (resp.ok) {
+        data = await resp.json();
+        $("#pc-name").text(data["pc_name"]);
+        $("#ip").text(data["ip"]);
+        $("#on").prop("checked", data["on"]);
+        $("#show-speed").val(data["play_time"]);
+        $("#play").prop("checked", data["play_news"]);
+        $("#from").val(data["news_from"]);
+        $("#to").val(data["news_to"]);
+      } else {
+        show_error("Verbindungsproblem");
+      }
+    });
+  });
+  $("#on").click(() => {
+    fetch("/switch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ip: $("#ip").text(),
+        on: $("#on").prop("checked"),
+      }),
+    });
+  });
+  function delete_mon() {
+    let pc_name = $("#pc-name").text();
+    fetch("/delete?monitor=" + pc_name, {
+      method: "GET",
+    })
+      .then(async (resp) => {
+        if (resp.ok) {
+          await show_success("Der Monitor '" + pc_name + "' wurde gelöscht ");
+          window.location.reload();
+        } else {
+          show_error("Da hat etwas nicht geklappt");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+</script>
+{%endif%} {%endblock%}
