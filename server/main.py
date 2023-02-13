@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, request, make_response, redirect
+from flask import Flask, render_template, request, make_response, redirect
 from flask_sqlalchemy import SQLAlchemy
 import hashlib
 import random
@@ -6,8 +6,6 @@ from string import ascii_lowercase as abc
 import json
 import os
 from wakeonlan import send_magic_packet
-from threading import Thread
-from time import sleep
 from datetime import datetime
 
 
