@@ -185,6 +185,15 @@ def update_ep():
     if request.method == "GET":
         query = DB.Monitor.query.filter_by(
             pc_name=request.args["monitor"]).first()
+        query = {
+                    "pc_name": query.pc_name,
+                    "ip": query.ip,
+                    "play_time": query.play_time,
+                    "on": query.on,
+                    "play_news": query.play_news,
+                    "news_from": query.news_from,
+                    "news_to": query.news_to
+                }
         if query:
             return json.dumps(query)
         else:
@@ -257,15 +266,6 @@ def updater():
                     query.on = False
                     db.session.add(query)
                     db.session.commit()
-                query = {
-                    "pc_name": query.pc_name,
-                    "ip": query.ip,
-                    "play_time": query.play_time,
-                    "on": query.on,
-                    "play_news": query.play_news,
-                    "news_from": query.news_from,
-                    "news_to": query.news_to
-                }
         sleep(1)
 
 
