@@ -1,0 +1,7 @@
+moviepy==1.0.3
+psutil==5.9.4
+pycaw==20220416
+pywin32==305
+requests==2.28.1
+selenium==4.8.0
+webdriver_manager==3.8.3
