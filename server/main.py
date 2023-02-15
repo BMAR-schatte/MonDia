@@ -192,7 +192,9 @@ def update_ep():
                     "on": query.on,
                     "play_news": query.play_news,
                     "news_from": query.news_from,
-                    "news_to": query.news_to
+                    "news_to": query.news_to,
+                    "on_from": query.on_from,
+                    "on_to": query.on_to
                 }
         if query:
             return json.dumps(query)
